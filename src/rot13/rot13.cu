@@ -48,11 +48,6 @@ void rot13OneLine(const char* filename)
   // Get string length
   size_t stringLength = strlen(fileBuf);
 
-for(int i = 0; i < stringLength; ++i)
-{
- printf("%i ",(unsigned int)fileBuf[i]);  
-}
-printf("\n");
   // allocate device memory
   char* d_fileBuf;
   CUDA_SAFE_CALL(cudaMalloc((void**) &d_fileBuf, stringLength));
@@ -63,9 +58,9 @@ printf("\n");
 
   
   // setup execution parameters
-  dim3 threads(BLOCK_SIZE, BLOCK_SIZE);
-  dim3 grid(stringLength / threads.x, stringLength / threads.y);
-  printf("%s\n", fileBuf);
+  //dim3 threads(BLOCK_SIZE, BLOCK_SIZE);
+  //dim3 grid(stringLength / threads.x, stringLength / threads.y);
+
   // execute the kernel
   rot13Kern<<< 1, stringLength >>>(d_fileBuf, stringLength);
 
@@ -75,11 +70,6 @@ printf("\n");
   // copy result from device to host
   CUDA_SAFE_CALL(cudaMemcpy(fileBuf, d_fileBuf, stringLength,
   						  cudaMemcpyDeviceToHost) );
-
-for(int i = 0; i < stringLength; ++i)
-{
-  printf("%i ", fileBuf);
-}
-printf("\n");
+  printf("%i\n%s\n", stringLength,fileBuf);
 
 }
