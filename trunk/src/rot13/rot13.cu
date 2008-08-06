@@ -11,7 +11,7 @@
 #include <math.h>
 
 // includes, project
-#include <cutil.h>
+//#include <cutil.h>
 
 // includes, kernels
 #include <rot13Kern.cu>
@@ -51,10 +51,15 @@ void rot13OneLine(const char* filename)
   // allocate device memory
   char* d_fileBuf;
   CUDA_SAFE_CALL(cudaMalloc((void**) &d_fileBuf, stringLength));
+
+  // copy host memory to device
+  CUDA_SAFE_CALL(cudaMemcpy(d_fileBuf, fileBuf, stringLength,
+                            cudaMemcpyHostToDevice) );
+
   
   // setup execution parameters
   dim3 threads(BLOCK_SIZE, BLOCK_SIZE);
-  dim3 grid(WC / threads.x, HC / threads.y);
+  dim3 grid(stringLength / threads.x, stringLength / threads.y);
 
   // execute the kernel
   rot13Kern<<< grid, threads >>>(d_fileBuf, stringLength);
@@ -63,7 +68,7 @@ void rot13OneLine(const char* filename)
   CUT_CHECK_ERROR("Kernel execution failed");
 
   // copy result from device to host
-  CUDA_SAFE_CALL(cudaMemcpy(h_C, d_C, mem_size_C,
+  CUDA_SAFE_CALL(cudaMemcpy(fileBuf, d_fileBuf, stringLength,
   						  cudaMemcpyDeviceToHost) );
 
 }
