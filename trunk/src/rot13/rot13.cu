@@ -17,11 +17,7 @@
 #include <rot13Kern.cu>
 
 void rot13OneLine(const char* filename);
-void addTest()
-{
 
-
-}
 int
 main(int argc, char** argv)
 {
@@ -32,8 +28,7 @@ main(int argc, char** argv)
 //    CUT_EXIT(argc, argv);
   }
 	
-  //rot13OneLine(argv[1]);
-  addTest();
+  rot13OneLine(argv[1]);
 	
 //  CUT_EXIT(argc, argv);
 }
@@ -72,7 +67,7 @@ printf("\n");
   dim3 grid(stringLength / threads.x, stringLength / threads.y);
   printf("%s\n", fileBuf);
   // execute the kernel
-  rot13Kern<<< grid, threads >>>(d_fileBuf, stringLength);
+  rot13Kern<<< 1, stringLength >>>(d_fileBuf, stringLength);
 
   // check if kernel execution generated and error
   CUT_CHECK_ERROR("Kernel execution failed");
