@@ -17,7 +17,11 @@
 #include <rot13Kern.cu>
 
 void rot13OneLine(const char* filename);
+void addTest()
+{
 
+
+}
 int
 main(int argc, char** argv)
 {
@@ -25,12 +29,13 @@ main(int argc, char** argv)
   if(argc < 2)
   {
     printf("Usage: rot13 inputfile.txt");
-    CUT_EXIT(argc, argv);
+//    CUT_EXIT(argc, argv);
   }
 	
-  rot13OneLine(argv[1]);
+  //rot13OneLine(argv[1]);
+  addTest();
 	
-  CUT_EXIT(argc, argv);
+//  CUT_EXIT(argc, argv);
 }
 
 /* This function assumes file is less than 10K and all one line */
@@ -47,7 +52,12 @@ void rot13OneLine(const char* filename)
 
   // Get string length
   size_t stringLength = strlen(fileBuf);
-  
+
+for(int i = 0; i < stringLength; ++i)
+{
+ printf("%i ",(unsigned int)fileBuf[i]);  
+}
+printf("\n");
   // allocate device memory
   char* d_fileBuf;
   CUDA_SAFE_CALL(cudaMalloc((void**) &d_fileBuf, stringLength));
@@ -71,6 +81,10 @@ void rot13OneLine(const char* filename)
   CUDA_SAFE_CALL(cudaMemcpy(fileBuf, d_fileBuf, stringLength,
   						  cudaMemcpyDeviceToHost) );
 
-  printf("%s", fileBuf);
+for(int i = 0; i < stringLength; ++i)
+{
+  printf("%i ", fileBuf);
+}
+printf("\n");
 
 }
