@@ -7,32 +7,21 @@
  #ifndef ROT13KERN_CU
  #define ROT13KERN_CU
 
-#define BLOCK_SIZE 16
+#define BLOCK_SIZE 512
  
  __global__ void
 rot13Kern( char* dat, size_t length)
 {
   // Block index
-  //int bx = blockIdx.x;
-  //int by = blockIdx.y;
+  int bx = blockIdx.x;
 
   // Thread index
   int tx = threadIdx.x;
-  //int ty = threadIdx.y;
-
-  // control vars
-  //int begin = 0;
-  //int end = length - 1;
-  //int step = BLOCK_SIZE;
   
   //__shared__ char dat[length];
-  int i = tx;
-  // load the shared memory
-  
-  //dat[i] = dataBuf[i];
-    
-    //__syncthreads();
-
+  int i = bx*BLOCK_SIZE + tx;
+  if(i < length)
+  {
     if(dat[i] > 90)
     {
       dat[i] = ((dat[i] - 84) % 26 ) + 97;
@@ -41,9 +30,8 @@ rot13Kern( char* dat, size_t length)
     { 
       dat[i] = ((dat[i] - 52) % 26 ) + 65;
     }
- 
-    __syncthreads();
+  } 
+  __syncthreads();
   
-  //dataBuf[tx] = dat[tx];
 }
  #endif

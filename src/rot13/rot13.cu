@@ -56,13 +56,9 @@ void rot13OneLine(const char* filename)
   CUDA_SAFE_CALL(cudaMemcpy(d_fileBuf, fileBuf, stringLength,
                             cudaMemcpyHostToDevice) );
 
-  
-  // setup execution parameters
-  //dim3 threads(BLOCK_SIZE, BLOCK_SIZE);
-  //dim3 grid(stringLength / threads.x, stringLength / threads.y);
-
+ 
   // execute the kernel
-  rot13Kern<<< 1, stringLength >>>(d_fileBuf, stringLength);
+  rot13Kern<<< stringLength/BLOCK_SIZE, BLOCK_SIZE >>>(d_fileBuf, stringLength);
 
   // check if kernel execution generated and error
   CUT_CHECK_ERROR("Kernel execution failed");
@@ -70,6 +66,6 @@ void rot13OneLine(const char* filename)
   // copy result from device to host
   CUDA_SAFE_CALL(cudaMemcpy(fileBuf, d_fileBuf, stringLength,
   						  cudaMemcpyDeviceToHost) );
-  printf("%i\n%s\n", stringLength,fileBuf);
+  printf("Length: %i\n%s\n", stringLength,fileBuf);
 
 }
