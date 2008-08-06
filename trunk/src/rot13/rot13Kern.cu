@@ -10,7 +10,7 @@
 #define BLOCK_SIZE 16
  
  __global__ void
-rot13Kern( char* dataBuf, size_t length)
+rot13Kern( char* dat, size_t length)
 {
   // Block index
   //int bx = blockIdx.x;
@@ -25,28 +25,25 @@ rot13Kern( char* dataBuf, size_t length)
   //int end = length - 1;
   //int step = BLOCK_SIZE;
   
-  __shared__ char dat[BLOCK_SIZE];
+  //__shared__ char dat[length];
+  int i = tx;
+  // load the shared memory
   
-//  for(int i = begin; i <= length; i += step)
-//  {
-    // load the shared memory
-    dat[tx] = dataBuf[tx];
+  //dat[i] = dataBuf[i];
     
-    __syncthreads();
-    if(dat[tx] > 90)
+    //__syncthreads();
+
+    if(dat[i] > 90)
     {
-      dat[tx] = /*((dat[tx] - 84) % 26 ) + 97*/ dat[tx] + 13;
+      dat[i] = ((dat[i] - 84) % 26 ) + 97;
     }
     else
     { 
-      dat[tx] = ((dat[tx] - 52) % 26 ) + 65;
+      dat[i] = ((dat[i] - 52) % 26 ) + 65;
     }
-    //dat[tx] = dat[tx] > 90 ? ((dat[tx] + 13) % 122 ) + 97 : ((dat[tx] 
-    //+ 13) % 90) + 65; 
  
     __syncthreads();
-//  }
   
-  dataBuf[tx] = dat[tx];
+  //dataBuf[tx] = dat[tx];
 }
  #endif
