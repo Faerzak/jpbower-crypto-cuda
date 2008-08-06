@@ -33,6 +33,8 @@
 #
 ################################################################################
 
+CFLAGS = -I../common/inc
+
 # Add source files here
 EXECUTABLE	:= rot13
 # Cuda source files (compiled with cudacc)
@@ -43,4 +45,4 @@ CCFILES		:=
 ################################################################################
 # Rules and targets
 
-include ../../common/common.mk
+include ../common/common.mk
