@@ -45,11 +45,11 @@ endif
 # (override directories only if they are not already defined)
 SRCDIR     ?= 
 ROOTDIR    ?= ..
-ROOTBINDIR ?= $(ROOTDIR)/../bin
+ROOTBINDIR ?= $(ROOTDIR)/bin
 BINDIR     ?= $(ROOTBINDIR)/linux
 ROOTOBJDIR ?= obj
-LIBDIR     := $(ROOTDIR)/../lib
-COMMONDIR  := $(ROOTDIR)/../common
+LIBDIR     := $(ROOTDIR)/lib
+COMMONDIR  := $(ROOTDIR)/common
 
 # Compilers
 NVCC       := nvcc 
