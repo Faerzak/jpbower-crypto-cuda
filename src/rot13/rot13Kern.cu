@@ -22,15 +22,15 @@ rot13Kern( char* dat, size_t length)
   int i = bx*BLOCK_SIZE + tx;
   if(i < length)
   {
-   /* if(dat[i] > 90)
+    if(dat[i] > 90)
     {
       dat[i] = ((dat[i] - 84) % 26 ) + 97;
     }
     else
     { 
       dat[i] = ((dat[i] - 52) % 26 ) + 65;
-    }*/
-    dat[i] = ((dat[i] - 52) % 57 ) + 65;
+    }
+    //dat[i] = ((dat[i] - 52) % 57 ) + 65;
   } 
   __syncthreads();
   
