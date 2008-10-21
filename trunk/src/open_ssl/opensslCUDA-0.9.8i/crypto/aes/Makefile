@@ -43,7 +43,7 @@ top:
 all:	lib
 
 lib:	$(LIBOBJ)
-	$(CUOBJ)
+	nvcc $(CUSRC)
 	$(AR) $(LIB) $(LIBOBJ)
 	$(RANLIB) $(LIB) || echo Never mind.
 	@touch lib
