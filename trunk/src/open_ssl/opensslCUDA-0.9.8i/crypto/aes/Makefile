@@ -43,7 +43,7 @@ top:
 all:	lib
 
 lib:	$(LIBOBJ)
-	nvcc $(CUDAINCL) $(CUSRC)
+	nvcc --compile $(CUDAINCL) $(CUSRC)
 	$(AR) $(LIB) $(LIBOBJ)
 	$(RANLIB) $(LIB) || echo Never mind.
 	@touch lib
