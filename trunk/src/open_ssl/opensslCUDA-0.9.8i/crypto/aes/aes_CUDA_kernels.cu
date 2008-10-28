@@ -323,6 +323,10 @@ __global__ void cudaEncryptKern()
 	const u32 *rk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
 	const char* in = d_inOutBuf;
+	const u32 *Te0 = d_te0Buf;
+	const u32 *Te1 = d_te1Buf;
+	const u32 *Te2 = d_te2Buf;
+	const u32 *Te3 = d_te3Buf;
 	s0 = GETU32(d_inOutBuf     ) ^ rk[0];
 	s1 = GETU32(d_inOutBuf +  4) ^ rk[1];
 	s2 = GETU32(d_inOutBuf +  8) ^ rk[2];
