@@ -326,7 +326,7 @@ void cudaEncryptKern()
 {
 	const u32 *rk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
-
+	const char* in = d_inOutBuf;
 	s0 = GETU32(d_inOutBuf     ) ^ rk[0];
 	s1 = GETU32(d_inOutBuf +  4) ^ rk[1];
 	s2 = GETU32(d_inOutBuf +  8) ^ rk[2];
