@@ -272,10 +272,10 @@ static const u32 Te3[256] = {
     0xb0b0cb7bU, 0x5454fca8U, 0xbbbbd66dU, 0x16163a2cU,
 };
 
-__constant__ u32* d_te0Buf;
-__constant__ u32* d_te1Buf;
-__constant__ u32* d_te2Buf;
-__constant__ u32* d_te3Buf;
+__shared__ u32* d_te0Buf;
+__shared__ u32* d_te1Buf;
+__shared__ u32* d_te2Buf;
+__shared__ u32* d_te3Buf;
 __shared__ static AES_KEY* d_fileBuf;
 __shared__ static char* d_inOutBuf;
 void copyKeyToDevice(AES_KEY* key)
