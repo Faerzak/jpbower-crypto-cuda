@@ -318,20 +318,20 @@ void copyOutToHost(char* out)
 }
 
 
-__global__ void cudaEncryptKern()
+__global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in, u32* rk)
 {
-	const u32 *rk;
+	//const u32 *rk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
-	const char* in = d_inOutBuf;
-	const u32 *Te0 = d_te0Buf;
-	const u32 *Te1 = d_te1Buf;
-	const u32 *Te2 = d_te2Buf;
-	const u32 *Te3 = d_te3Buf;
+	//const char* in = d_inOutBuf;
+	//const u32 *Te0 = d_te0Buf;
+	//const u32 *Te1 = d_te1Buf;
+	//const u32 *Te2 = d_te2Buf;
+	//const u32 *Te3 = d_te3Buf;
 	s0 = GETU32(d_inOutBuf     ) ^ rk[0];
 	s1 = GETU32(d_inOutBuf +  4) ^ rk[1];
 	s2 = GETU32(d_inOutBuf +  8) ^ rk[2];
 	s3 = GETU32(d_inOutBuf + 12) ^ rk[3];
-	rk = d_fileBuf->rd_key;
+	//rk = d_fileBuf->rd_key;
 
 	/* round 1: */
    	t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >>  8) & 0xff] ^ Te3[s3 & 0xff] ^ rk[ 4];
@@ -411,5 +411,5 @@ __global__ void cudaEncryptKern()
 
 void cudaEncrypt()
 {
- cudaEncryptKern<<<1,1>>>();
+ cudaEncryptKern<<<1,1>>>(d_te0Buf, d_te1Buf, d_te2Buf, d_te3Buf, d_inOutbuf, d_fileBuf->rd_key);
 }
