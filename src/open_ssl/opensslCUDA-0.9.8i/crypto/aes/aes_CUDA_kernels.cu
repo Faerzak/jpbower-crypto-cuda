@@ -295,7 +295,7 @@ void copyKeyToDevice(AES_KEY* key)
   CUDA_SAFE_CALL(cudaMalloc((void**) &d_te1Buf, sizeof(1024)));
   CUDA_SAFE_CALL(cudaMemcpy(d_te1Buf, Te1, sizeof(1024), cudaMemcpyHostToDevice));
 
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_t2Buf, sizeof(1024)));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te2Buf, sizeof(1024)));
   CUDA_SAFE_CALL(cudaMemcpy(d_te2Buf, Te2, sizeof(1024), cudaMemcpyHostToDevice));
   
   CUDA_SAFE_CALL(cudaMalloc((void**) &d_te3Buf, sizeof(1024)));
