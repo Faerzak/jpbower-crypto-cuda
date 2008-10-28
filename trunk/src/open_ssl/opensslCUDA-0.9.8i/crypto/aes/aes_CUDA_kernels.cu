@@ -385,28 +385,28 @@ __global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in
 		(Te0[(t2 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t3      ) & 0xff] & 0x000000ff) ^
 		rk[0];
-	PUTU32(d_inOutBuf     , s0);
+	PUTU32(in     , s0);
 	s1 =
 		(Te2[(t1 >> 24)       ] & 0xff000000) ^
 		(Te3[(t2 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t3 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t0      ) & 0xff] & 0x000000ff) ^
 		rk[1];
-	PUTU32(d_inOutBuf +  4, s1);
+	PUTU32(in +  4, s1);
 	s2 =
 		(Te2[(t2 >> 24)       ] & 0xff000000) ^
 		(Te3[(t3 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t0 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t1      ) & 0xff] & 0x000000ff) ^
 		rk[2];
-	PUTU32(d_inOutBuf +  8, s2);
+	PUTU32(in +  8, s2);
 	s3 =
 		(Te2[(t3 >> 24)       ] & 0xff000000) ^
 		(Te3[(t0 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t1 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t2      ) & 0xff] & 0x000000ff) ^
 		rk[3];
-	PUTU32(d_inOutBuf + 12, s3);
+	PUTU32(in + 12, s3);
 }
 
 void cudaEncrypt()
