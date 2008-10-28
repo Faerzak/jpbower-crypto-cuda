@@ -327,10 +327,10 @@ __global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in
 	//const u32 *Te1 = d_te1Buf;
 	//const u32 *Te2 = d_te2Buf;
 	//const u32 *Te3 = d_te3Buf;
-	s0 = GETU32(d_inOutBuf     ) ^ rk[0];
-	s1 = GETU32(d_inOutBuf +  4) ^ rk[1];
-	s2 = GETU32(d_inOutBuf +  8) ^ rk[2];
-	s3 = GETU32(d_inOutBuf + 12) ^ rk[3];
+	s0 = GETU32(in     ) ^ rk[0];
+	s1 = GETU32(in +  4) ^ rk[1];
+	s2 = GETU32(in +  8) ^ rk[2];
+	s3 = GETU32(in + 12) ^ rk[3];
 	//rk = d_fileBuf->rd_key;
 
 	/* round 1: */
