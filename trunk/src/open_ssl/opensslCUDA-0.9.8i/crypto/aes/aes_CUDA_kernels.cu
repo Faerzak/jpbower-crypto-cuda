@@ -411,5 +411,5 @@ __global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in
 
 void cudaEncrypt()
 {
- cudaEncryptKern<<<1,1>>>(d_te0Buf, d_te1Buf, d_te2Buf, d_te3Buf, d_inOutbuf, d_fileBuf->rd_key);
+ cudaEncryptKern<<<1,1>>>(d_te0Buf, d_te1Buf, d_te2Buf, d_te3Buf, d_inOutBuf, d_fileBuf->rd_key);
 }
