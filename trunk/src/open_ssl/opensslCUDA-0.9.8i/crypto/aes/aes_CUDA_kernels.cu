@@ -289,17 +289,17 @@ void copyKeyToDevice(AES_KEY* key)
 			    cudaMemcpyHostToDevice));
 
   // Load T-tables into device memory
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te0Buf, sizeof(256 * u32)));
-  CUDA_SAFE_CALL(cudaMemcpy(d_te0Buf, Te0, sizeof(256 * u32), cudaMemcpyHostToDevice));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te0Buf, sizeof(1024)));
+  CUDA_SAFE_CALL(cudaMemcpy(d_te0Buf, Te0, sizeof(1024), cudaMemcpyHostToDevice));
   
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te1Buf, sizeof(256 * u32)));
-  CUDA_SAFE_CALL(cudaMemcpy(d_te1Buf, Te1, sizeof(256 * u32), cudaMemcpyHostToDevice));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te1Buf, sizeof(1024)));
+  CUDA_SAFE_CALL(cudaMemcpy(d_te1Buf, Te1, sizeof(1024), cudaMemcpyHostToDevice));
 
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_t2Buf, sizeof(256 * u32)));
-  CUDA_SAFE_CALL(cudaMemcpy(d_te2Buf, Te2, sizeof(256 * u32), cudaMemcpyHostToDevice));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_t2Buf, sizeof(1024)));
+  CUDA_SAFE_CALL(cudaMemcpy(d_te2Buf, Te2, sizeof(1024), cudaMemcpyHostToDevice));
   
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te3Buf, sizeof(256 * u32)));
-  CUDA_SAFE_CALL(cudaMemcpy(d_te3Buf, Te3, sizeof(256 * u32), cudaMemcpyHostToDevice));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te3Buf, sizeof(1024)));
+  CUDA_SAFE_CALL(cudaMemcpy(d_te3Buf, Te3, sizeof(1024), cudaMemcpyHostToDevice));
 }
 
 void copyInToDevice(char* in)
