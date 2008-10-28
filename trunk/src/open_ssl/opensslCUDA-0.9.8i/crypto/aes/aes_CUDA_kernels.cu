@@ -407,5 +407,5 @@ void cudaEncryptKern()
 
 void cudaEncrypt()
 {
-  cudaEncryptKern<<<1,1>>>();
+ cudaEncryptKern<<<1,1>>>();
 }
