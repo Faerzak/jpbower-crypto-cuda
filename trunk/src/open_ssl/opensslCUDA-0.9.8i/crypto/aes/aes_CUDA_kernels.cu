@@ -317,10 +317,6 @@ void copyOutToHost(char* out)
   						  cudaMemcpyDeviceToHost) );
 }
 
-void cudaEncrypt()
-{
-  cudaEncryptKern<<<1,1>>>();
-}
 
 void cudaEncryptKern()
 {
@@ -407,4 +403,9 @@ void cudaEncryptKern()
 		(Te1[(t2      ) & 0xff] & 0x000000ff) ^
 		rk[3];
 	PUTU32(d_inOutBuf + 12, s3);
+}
+
+void cudaEncrypt()
+{
+  cudaEncryptKern<<<1,1>>>();
 }
