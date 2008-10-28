@@ -318,7 +318,7 @@ void copyOutToHost(char* out)
 }
 
 
-void cudaEncryptKern()
+__global__ void cudaEncryptKern()
 {
 	const u32 *rk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
