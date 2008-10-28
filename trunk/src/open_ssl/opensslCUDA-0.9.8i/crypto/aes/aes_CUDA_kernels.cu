@@ -278,7 +278,7 @@ u32* d_te2Buf;
 u32* d_te3Buf;
 static AES_KEY* d_fileBuf;
 static char* d_inOutBuf;
-void copyKeyToDevice(AES_KEY* key)
+extern "C" void copyKeyToDevice(AES_KEY* key)
 {
   // First attempt, load into device memory
 
@@ -302,7 +302,7 @@ void copyKeyToDevice(AES_KEY* key)
   CUDA_SAFE_CALL(cudaMemcpy(d_te3Buf, Te3, sizeof(1024), cudaMemcpyHostToDevice));
 }
 
-void copyInToDevice(char* in)
+extern "C" void copyInToDevice(char* in)
 {
 CUDA_SAFE_CALL(cudaMalloc((void**) &d_inOutBuf, 64));
 
@@ -311,7 +311,7 @@ CUDA_SAFE_CALL(cudaMemcpy(d_inOutBuf, in, 64,
                           cudaMemcpyHostToDevice) );
 }
 
-void copyOutToHost(char* out)
+extern "C" void copyOutToHost(char* out)
 {
   CUDA_SAFE_CALL(cudaMemcpy(out, d_inOutBuf, 64,
   						  cudaMemcpyDeviceToHost) );
@@ -409,7 +409,7 @@ __global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in
 	PUTU32(in + 12, s3);
 }
 
-void cudaEncrypt()
+extern "C" void cudaEncrypt()
 {
  cudaEncryptKern<<<1,1>>>(d_te0Buf, d_te1Buf, d_te2Buf, d_te3Buf, d_inOutBuf, d_fileBuf->rd_key);
 }
