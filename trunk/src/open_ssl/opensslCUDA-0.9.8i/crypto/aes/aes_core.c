@@ -786,16 +786,12 @@ void AES_encrypt(const unsigned char *in, unsigned char *out,
 // Discard Key, it is already loaded onto the device
 // allocate device memory
 char* d_inOutBuf;
-CUDA_SAFE_CALL(cudaMalloc((void**) &d_inOutBuf, 64));
-
-// copy host memory to device
-CUDA_SAFE_CALL(cudaMemcpy(d_inOutBuf, in, 64,
-                          cudaMemcpyHostToDevice) );
+copyInToDevice(in);
 
   // execute the kernel
-cudaEncrypt<<< 1, 1 >>>(d_inOutBuf);
+cudaEncrypt();
 
-
+copyOutToHost(out);
 
 /* End CUDA Implementation, comment out rest of function */
 	const u32 *rk;
