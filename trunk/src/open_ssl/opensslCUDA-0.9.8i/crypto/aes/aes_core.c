@@ -782,6 +782,22 @@ int AES_set_decrypt_key(const unsigned char *userKey, const int bits,
 void AES_encrypt(const unsigned char *in, unsigned char *out,
 		 const AES_KEY *key) {
 
+/* CUDA Implementation */
+// Discard Key, it is already loaded onto the device
+// allocate device memory
+char* d_inOutBuf;
+CUDA_SAFE_CALL(cudaMalloc((void**) &d_inOutBuf, 64));
+
+// copy host memory to device
+CUDA_SAFE_CALL(cudaMemcpy(d_inOutBuf, in, 64,
+                          cudaMemcpyHostToDevice) );
+
+  // execute the kernel
+cudaEncrypt<<< 1, 1 >>>(d_inOutBuf);
+
+
+
+/* End CUDA Implementation, comment out rest of function */
 	const u32 *rk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
 #ifndef FULL_UNROLL
