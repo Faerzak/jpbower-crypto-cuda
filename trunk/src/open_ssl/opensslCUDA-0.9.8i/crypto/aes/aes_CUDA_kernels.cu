@@ -327,11 +327,11 @@ void cudaEncryptKern()
 	const u32 *rk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
 
-	s0 = GETU32(in     ) ^ rk[0];
-	s1 = GETU32(in +  4) ^ rk[1];
-	s2 = GETU32(in +  8) ^ rk[2];
-	s3 = GETU32(in + 12) ^ rk[3];
-	rk = key->rd_key;
+	s0 = GETU32(d_inOutBuf     ) ^ rk[0];
+	s1 = GETU32(d_inOutBuf +  4) ^ rk[1];
+	s2 = GETU32(d_inOutBuf +  8) ^ rk[2];
+	s3 = GETU32(d_inOutBuf + 12) ^ rk[3];
+	rk = d_fileBuf->rd_key;
 
 	/* round 1: */
    	t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >>  8) & 0xff] ^ Te3[s3 & 0xff] ^ rk[ 4];
@@ -385,26 +385,26 @@ void cudaEncryptKern()
 		(Te0[(t2 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t3      ) & 0xff] & 0x000000ff) ^
 		rk[0];
-	PUTU32(in     , s0);
+	PUTU32(d_inOutBuf     , s0);
 	s1 =
 		(Te2[(t1 >> 24)       ] & 0xff000000) ^
 		(Te3[(t2 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t3 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t0      ) & 0xff] & 0x000000ff) ^
 		rk[1];
-	PUTU32(in +  4, s1);
+	PUTU32(d_inOutBuf +  4, s1);
 	s2 =
 		(Te2[(t2 >> 24)       ] & 0xff000000) ^
 		(Te3[(t3 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t0 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t1      ) & 0xff] & 0x000000ff) ^
 		rk[2];
-	PUTU32(in +  8, s2);
+	PUTU32(d_inOutBuf +  8, s2);
 	s3 =
 		(Te2[(t3 >> 24)       ] & 0xff000000) ^
 		(Te3[(t0 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t1 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t2      ) & 0xff] & 0x000000ff) ^
 		rk[3];
-	PUTU32(in + 12, s3);
+	PUTU32(d_inOutBuf + 12, s3);
 }
