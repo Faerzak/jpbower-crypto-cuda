@@ -781,17 +781,29 @@ int AES_set_decrypt_key(const unsigned char *userKey, const int bits,
  */
 void AES_encrypt(const unsigned char *in, unsigned char *out,
 		 const AES_KEY *key) {
-
+    int i = 0;
 /* CUDA Implementation */
 // Discard Key, it is already loaded onto the device
 // allocate device memory
+    printf("Sending:\n");
+    for(i = 0; i < 16; ++i)
+	{
+	    printf("%02x ",in[i]);
+	}
+    printf("\n");
 
 copyInToDevice(in);
 
   // execute the kernel
-cudaEncrypt();
+//cudaEncrypt();
 
 copyOutToHost(out);
+printf("Got Back:\n");
+for(i = 0; i < 16; ++i)
+    {
+	printf("%02x ",out[i]);
+    }
+printf("\n");
 
 /* End CUDA Implementation, comment out rest of function */
 
