@@ -626,15 +626,22 @@ static const u32 rcon[] = {
  */
 int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 			AES_KEY *key) {
-
+    //printf("Setting encrypt key\n");
+    int q = 0;
 	u32 *rk;
    	int i = 0;
 	u32 temp;
 
 	if (!userKey || !key)
+	    {
+		//printf("Failing set encrypt key -1\n");
 		return -1;
+	    }
 	if (bits != 128 && bits != 192 && bits != 256)
+	    {
+		//printf("Failing set encrypt key -2\n");
 		return -2;
+	    }
 
 	rk = key->rd_key;
 
@@ -662,7 +669,7 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 			rk[6] = rk[2] ^ rk[5];
 			rk[7] = rk[3] ^ rk[6];
 			if (++i == 10) {
-				return 0;
+				goto END;
 			}
 			rk += 4;
 		}
@@ -682,7 +689,7 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 			rk[ 8] = rk[ 2] ^ rk[ 7];
 			rk[ 9] = rk[ 3] ^ rk[ 8];
 			if (++i == 8) {
-				return 0;
+				goto END;
 			}
 			rk[10] = rk[ 4] ^ rk[ 9];
 			rk[11] = rk[ 5] ^ rk[10];
@@ -704,7 +711,7 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 			rk[10] = rk[ 2] ^ rk[ 9];
 			rk[11] = rk[ 3] ^ rk[10];
 			if (++i == 7) {
-				return 0;
+			       goto END;
 			}
 			temp = rk[11];
 			rk[12] = rk[ 4] ^
@@ -719,8 +726,11 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 			rk += 8;
         	}
 	}
+
+ END:
 	copyKeyToDevice(key);
-	return 0;
+	//printf("After copying key to device\n");
+	return 0;   
 }
 
 /**
@@ -771,7 +781,7 @@ int AES_set_decrypt_key(const unsigned char *userKey, const int bits,
 			Td2[Te1[(rk[3] >>  8) & 0xff] & 0xff] ^
 			Td3[Te1[(rk[3]      ) & 0xff] & 0xff];
 	}
-	return 0;
+	return 0; 
 }
 
 #ifndef AES_ASM
@@ -781,31 +791,31 @@ int AES_set_decrypt_key(const unsigned char *userKey, const int bits,
  */
 void AES_encrypt(const unsigned char *in, unsigned char *out,
 		 const AES_KEY *key) {
-    int i = 0;
-/* CUDA Implementation */
+    int i = 0; 
+/* CUDA Implementation */ 
 // Discard Key, it is already loaded onto the device
 // allocate device memory
-    printf("Sending:\n");
-    for(i = 0; i < 16; ++i)
-	{
-	    printf("%02x ",in[i]);
-	}
-    printf("\n");
+//  printf("Sending:\n");
+//    for(i = 0; i < 16; ++i)
+//	{
+//	    printf("%02x ",in[i]);
+//	}
+//    printf("\n");
 
-copyInToDevice(in);
+copyInToDevice(in);   
 
   // execute the kernel
-//cudaEncrypt();
+cudaEncrypt();   
 
 copyOutToHost(out);
-printf("Got Back:\n");
-for(i = 0; i < 16; ++i)
-    {
-	printf("%02x ",out[i]);
-    }
-printf("\n");
+//printf("Got Back:\n");
+//for(i = 0; i < 16; ++i)
+//    {
+//	printf("%02x ",out[i]);
+//    }
+//printf("\n");
 
-/* End CUDA Implementation, comment out rest of function */
+/* End CUDA Implementation, comment out rest of function */ 
 
 }
 

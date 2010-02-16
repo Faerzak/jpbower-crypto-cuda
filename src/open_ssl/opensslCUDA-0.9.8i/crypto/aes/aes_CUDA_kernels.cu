@@ -277,48 +277,49 @@ u32* d_te1Buf;
 u32* d_te2Buf;
 u32* d_te3Buf;
 static AES_KEY* d_fileBuf;
-static char* d_inOutBuf;
+static unsigned char* d_inOutBuf;
 extern "C" void copyKeyToDevice(AES_KEY* key)
 {
   // First attempt, load into device memory
-
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_fileBuf, sizeof(AES_KEY))); 
-
+  //printf("copyKeyToDevice\n");
+  //printf("%x %x\n", key, (key->rd_key));
+  cudaError_t result = cudaMalloc((void**) &d_fileBuf, sizeof(AES_KEY)); 
+  //printf("Malloc done %s\n", cudaGetErrorString(result));
   // Copy host memory to device
   CUDA_SAFE_CALL(cudaMemcpy(d_fileBuf, key, sizeof(AES_KEY), 
 			    cudaMemcpyHostToDevice));
 
   // Load T-tables into device memory
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te0Buf, sizeof(1024)));
-  CUDA_SAFE_CALL(cudaMemcpy(d_te0Buf, Te0, sizeof(1024), cudaMemcpyHostToDevice));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te0Buf, 1024));
+  CUDA_SAFE_CALL(cudaMemcpy(d_te0Buf, Te0, 1024, cudaMemcpyHostToDevice));
   
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te1Buf, sizeof(1024)));
-  CUDA_SAFE_CALL(cudaMemcpy(d_te1Buf, Te1, sizeof(1024), cudaMemcpyHostToDevice));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te1Buf, 1024));
+  CUDA_SAFE_CALL(cudaMemcpy(d_te1Buf, Te1, 1024, cudaMemcpyHostToDevice));
 
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te2Buf, sizeof(1024)));
-  CUDA_SAFE_CALL(cudaMemcpy(d_te2Buf, Te2, sizeof(1024), cudaMemcpyHostToDevice));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te2Buf, 1024));
+  CUDA_SAFE_CALL(cudaMemcpy(d_te2Buf, Te2, 1024, cudaMemcpyHostToDevice));
   
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te3Buf, sizeof(1024)));
-  CUDA_SAFE_CALL(cudaMemcpy(d_te3Buf, Te3, sizeof(1024), cudaMemcpyHostToDevice));
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_te3Buf, 1024));
+  CUDA_SAFE_CALL(cudaMemcpy(d_te3Buf, Te3, 1024, cudaMemcpyHostToDevice));
+  
+  CUDA_SAFE_CALL(cudaMalloc((void**) &d_inOutBuf, 16));
 }
 
-extern "C" void copyInToDevice(char* in)
+extern "C" void copyInToDevice(unsigned char* in)
 {
-CUDA_SAFE_CALL(cudaMalloc((void**) &d_inOutBuf, 64));
-
 // copy host memory to device
-CUDA_SAFE_CALL(cudaMemcpy(d_inOutBuf, in, 64,
+CUDA_SAFE_CALL(cudaMemcpy(d_inOutBuf, in, 16,
                           cudaMemcpyHostToDevice) );
 }
 
-extern "C" void copyOutToHost(char* out)
+extern "C" void copyOutToHost(unsigned char* out)
 {
-  CUDA_SAFE_CALL(cudaMemcpy(out, d_inOutBuf, 64,
-  						  cudaMemcpyDeviceToHost) );
+  CUDA_SAFE_CALL(cudaMemcpy(out, d_inOutBuf, 16, cudaMemcpyDeviceToHost) );
+
 }
 
 
-__global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in, u32* rk)
+__global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, unsigned char* in, u32* rk)
 {
 	//const u32 *rk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
@@ -338,7 +339,7 @@ __global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in
    	t1 = Te0[s1 >> 24] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >>  8) & 0xff] ^ Te3[s0 & 0xff] ^ rk[ 5];
    	t2 = Te0[s2 >> 24] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >>  8) & 0xff] ^ Te3[s1 & 0xff] ^ rk[ 6];
    	t3 = Te0[s3 >> 24] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >>  8) & 0xff] ^ Te3[s2 & 0xff] ^ rk[ 7];
-   	/* round 2: */
+  	/* round 2: */
    	s0 = Te0[t0 >> 24] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >>  8) & 0xff] ^ Te3[t3 & 0xff] ^ rk[ 8];
    	s1 = Te0[t1 >> 24] ^ Te1[(t2 >> 16) & 0xff] ^ Te2[(t3 >>  8) & 0xff] ^ Te3[t0 & 0xff] ^ rk[ 9];
    	s2 = Te0[t2 >> 24] ^ Te1[(t3 >> 16) & 0xff] ^ Te2[(t0 >>  8) & 0xff] ^ Te3[t1 & 0xff] ^ rk[10];
@@ -359,7 +360,7 @@ __global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in
    	t2 = Te0[s2 >> 24] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >>  8) & 0xff] ^ Te3[s1 & 0xff] ^ rk[22];
    	t3 = Te0[s3 >> 24] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >>  8) & 0xff] ^ Te3[s2 & 0xff] ^ rk[23];
    	/* round 6: */
-   	s0 = Te0[t0 >> 24] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >>  8) & 0xff] ^ Te3[t3 & 0xff] ^ rk[24];
+  	s0 = Te0[t0 >> 24] ^ Te1[(t1 >> 16) & 0xff] ^ Te2[(t2 >>  8) & 0xff] ^ Te3[t3 & 0xff] ^ rk[24];
    	s1 = Te0[t1 >> 24] ^ Te1[(t2 >> 16) & 0xff] ^ Te2[(t3 >>  8) & 0xff] ^ Te3[t0 & 0xff] ^ rk[25];
    	s2 = Te0[t2 >> 24] ^ Te1[(t3 >> 16) & 0xff] ^ Te2[(t0 >>  8) & 0xff] ^ Te3[t1 & 0xff] ^ rk[26];
    	s3 = Te0[t3 >> 24] ^ Te1[(t0 >> 16) & 0xff] ^ Te2[(t1 >>  8) & 0xff] ^ Te3[t2 & 0xff] ^ rk[27];
@@ -378,7 +379,7 @@ __global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, char* in
    	t1 = Te0[s1 >> 24] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >>  8) & 0xff] ^ Te3[s0 & 0xff] ^ rk[37];
    	t2 = Te0[s2 >> 24] ^ Te1[(s3 >> 16) & 0xff] ^ Te2[(s0 >>  8) & 0xff] ^ Te3[s1 & 0xff] ^ rk[38];
    	t3 = Te0[s3 >> 24] ^ Te1[(s0 >> 16) & 0xff] ^ Te2[(s1 >>  8) & 0xff] ^ Te3[s2 & 0xff] ^ rk[39];
-
+	rk += 10 << 2;
 	s0 =
 		(Te2[(t0 >> 24)       ] & 0xff000000) ^
 		(Te3[(t1 >> 16) & 0xff] & 0x00ff0000) ^
