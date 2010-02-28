@@ -259,7 +259,7 @@
 #endif
 
 #undef BUFSIZE
-#define BUFSIZE	((long)1024*8+1)
+#define BUFSIZE	(long)((1024*8+1)*512)
 int run=0;
 
 static char ftime_used = 0, times_used = 0, gettimeofday_used = 0, getrusage_used = 0;
@@ -1804,7 +1804,7 @@ int MAIN(int argc, char **argv)
 					(unsigned long)lengths[j],&aes_ks1,
 					iv,AES_ENCRYPT);
 			d=Time_F(STOP);
-			print_result(D_CBC_128_AES,j,count,d);
+			print_result(D_CBC_128_AES,j,count*200,d);
 			}
 		}
 	if (doit[D_CBC_192_AES])

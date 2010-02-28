@@ -28,7 +28,7 @@
 /* Note: rewritten a little bit to provide error control and an OpenSSL-
    compatible API */
 
-#ifndef AES_DEBUG
+#ifndef AES_DEBUG 
 # ifndef NDEBUG
 #  define NDEBUG
 # endif
@@ -183,7 +183,7 @@ static const u32 Te1[256] = {
     0xda65bfbfU, 0x31d7e6e6U, 0xc6844242U, 0xb8d06868U,
     0xc3824141U, 0xb0299999U, 0x775a2d2dU, 0x111e0f0fU,
     0xcb7bb0b0U, 0xfca85454U, 0xd66dbbbbU, 0x3a2c1616U,
-};
+}; 
 static const u32 Te2[256] = {
     0x63a5c663U, 0x7c84f87cU, 0x7799ee77U, 0x7b8df67bU,
     0xf20dfff2U, 0x6bbdd66bU, 0x6fb1de6fU, 0xc55491c5U,
@@ -249,8 +249,8 @@ static const u32 Te2[256] = {
     0xbfda65bfU, 0xe631d7e6U, 0x42c68442U, 0x68b8d068U,
     0x41c38241U, 0x99b02999U, 0x2d775a2dU, 0x0f111e0fU,
     0xb0cb7bb0U, 0x54fca854U, 0xbbd66dbbU, 0x163a2c16U,
-};
-static const u32 Te3[256] = {
+};    
+static const u32 Te3[256] = { 
     0x6363a5c6U, 0x7c7c84f8U, 0x777799eeU, 0x7b7b8df6U,
     0xf2f20dffU, 0x6b6bbdd6U, 0x6f6fb1deU, 0xc5c55491U,
     0x30305060U, 0x01010302U, 0x6767a9ceU, 0x2b2b7d56U,
@@ -615,10 +615,10 @@ static const u8 Td4[256] = {
     0x17U, 0x2bU, 0x04U, 0x7eU, 0xbaU, 0x77U, 0xd6U, 0x26U,
     0xe1U, 0x69U, 0x14U, 0x63U, 0x55U, 0x21U, 0x0cU, 0x7dU,
 };
-static const u32 rcon[] = {
+static const u32 rcon[] = { 
 	0x01000000, 0x02000000, 0x04000000, 0x08000000,
 	0x10000000, 0x20000000, 0x40000000, 0x80000000,
-	0x1B000000, 0x36000000, /* for 128-bit blocks, Rijndael never uses more than 10 rcon values */
+	0x1B000000, 0x36000000, /* for 128-bit blocks, Rijndael never uses more than 10 rcon values */            
 };
 
 /**
@@ -626,7 +626,14 @@ static const u32 rcon[] = {
  */
 int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 			AES_KEY *key) {
-    //printf("Setting encrypt key\n");
+    int p = 0;
+//    printf("Setting encrypt key\n");
+//    printf("bits: %i\n", bits);
+//    for(p = 0; p < 10; ++p)
+//	{
+//	    printf("0x%02x ",userKey[p]);
+//	}
+//    printf("\n");
     int q = 0;
 	u32 *rk;
    	int i = 0;
@@ -637,7 +644,7 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 		//printf("Failing set encrypt key -1\n");
 		return -1;
 	    }
-	if (bits != 128 && bits != 192 && bits != 256)
+	if (bits != 128)//cuda only supports 128-bits
 	    {
 		//printf("Failing set encrypt key -2\n");
 		return -2;
@@ -676,7 +683,7 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 	}
 	rk[4] = GETU32(userKey + 16);
 	rk[5] = GETU32(userKey + 20);
-	if (bits == 192) {
+	if (bits == 192) { 
 		while (1) {
 			temp = rk[ 5];
 			rk[ 6] = rk[ 0] ^
@@ -790,7 +797,13 @@ int AES_set_decrypt_key(const unsigned char *userKey, const int bits,
  * in and out can overlap
  */
 void AES_encrypt(const unsigned char *in, unsigned char *out,
-		 const AES_KEY *key) {
+		 const AES_KEY *key)
+{
+   
+}
+
+void AES_encrypt2(const unsigned char *in, unsigned char *out,
+		 const AES_KEY *key, const unsigned long length, char* ivec) {
     int i = 0; 
 /* CUDA Implementation */ 
 // Discard Key, it is already loaded onto the device
@@ -801,15 +814,12 @@ void AES_encrypt(const unsigned char *in, unsigned char *out,
 //	    printf("%02x ",in[i]);
 //	}
 //    printf("\n");
-
-copyInToDevice(in);   
-
-  // execute the kernel
-cudaEncrypt();   
-
-copyOutToHost(out);
+    copyInToDevice(in, length);   
+  // execute the kernel 
+cudaEncrypt();   ;
+copyOutToHost(out, length);
 //printf("Got Back:\n");
-//for(i = 0; i < 16; ++i)
+//for(i = 0; i < 16; ++i) 
 //    {
 //	printf("%02x ",out[i]);
 //    }
@@ -817,7 +827,7 @@ copyOutToHost(out);
 
 /* End CUDA Implementation, comment out rest of function */ 
 
-}
+} 
 
 /*
  * Decrypt a single block
@@ -839,7 +849,7 @@ void AES_decrypt(const unsigned char *in, unsigned char *out,
 	 * map byte array block to cipher state
 	 * and add initial round key:
 	 */
-    s0 = GETU32(in     ) ^ rk[0];
+    s0 = GETU32(in     ) ^ rk[0]; 
     s1 = GETU32(in +  4) ^ rk[1];
     s2 = GETU32(in +  8) ^ rk[2];
     s3 = GETU32(in + 12) ^ rk[3];
@@ -901,7 +911,7 @@ void AES_decrypt(const unsigned char *in, unsigned char *out,
         t2 = Td0[s2 >> 24] ^ Td1[(s1 >> 16) & 0xff] ^ Td2[(s0 >>  8) & 0xff] ^ Td3[s3 & 0xff] ^ rk[46];
         t3 = Td0[s3 >> 24] ^ Td1[(s2 >> 16) & 0xff] ^ Td2[(s1 >>  8) & 0xff] ^ Td3[s0 & 0xff] ^ rk[47];
         if (key->rounds > 12) {
-            /* round 12: */
+            /* round 12: */ 
             s0 = Td0[t0 >> 24] ^ Td1[(t3 >> 16) & 0xff] ^ Td2[(t2 >>  8) & 0xff] ^ Td3[t1 & 0xff] ^ rk[48];
             s1 = Td0[t1 >> 24] ^ Td1[(t0 >> 16) & 0xff] ^ Td2[(t3 >>  8) & 0xff] ^ Td3[t2 & 0xff] ^ rk[49];
             s2 = Td0[t2 >> 24] ^ Td1[(t1 >> 16) & 0xff] ^ Td2[(t0 >>  8) & 0xff] ^ Td3[t3 & 0xff] ^ rk[50];

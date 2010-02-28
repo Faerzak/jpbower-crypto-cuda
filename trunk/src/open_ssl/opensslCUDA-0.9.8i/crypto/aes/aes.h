@@ -88,8 +88,10 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 int AES_set_decrypt_key(const unsigned char *userKey, const int bits,
 	AES_KEY *key);
 
+void AES_encrypt2(const unsigned char *in, unsigned char *out,
+		 const AES_KEY *key, const unsigned long length, char* ivec);
 void AES_encrypt(const unsigned char *in, unsigned char *out,
-	const AES_KEY *key);
+		 const AES_KEY *key);
 void AES_decrypt(const unsigned char *in, unsigned char *out,
 	const AES_KEY *key);
 

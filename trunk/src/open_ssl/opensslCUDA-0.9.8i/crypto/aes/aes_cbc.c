@@ -72,7 +72,7 @@ void AES_cbc_encrypt(const unsigned char *in, unsigned char *out,
 	assert((AES_ENCRYPT == enc)||(AES_DECRYPT == enc));
 
 	if (AES_ENCRYPT == enc) {
-		while (len >= AES_BLOCK_SIZE) {
+	    /*while (len >= AES_BLOCK_SIZE) {
 			for(n=0; n < AES_BLOCK_SIZE; ++n)
 				out[n] = in[n] ^ iv[n];
 			AES_encrypt(out, out, key);
@@ -88,7 +88,8 @@ void AES_cbc_encrypt(const unsigned char *in, unsigned char *out,
 				out[n] = iv[n];
 			AES_encrypt(out, out, key);
 			iv = out;
-		}
+			}*/
+	    AES_encrypt2(in, out, key, length, iv); 
 		memcpy(ivec,iv,AES_BLOCK_SIZE);
 	} else if (in != out) {
 		while (len >= AES_BLOCK_SIZE) {
