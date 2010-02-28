@@ -3,7 +3,7 @@
 #include "aes.h"
 
 void copyKeyToDevice(AES_KEY* key);
-void copyInToDevice(char* in);
-void copyOutToHost(char* out);
+void copyInToDevice(char* in, const unsigned long len);
+void copyOutToHost(char* out, const unsigned long len);
 void cudaEncrypt();
 #endif

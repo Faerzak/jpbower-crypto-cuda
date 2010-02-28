@@ -278,6 +278,8 @@ u32* d_te2Buf;
 u32* d_te3Buf;
 static AES_KEY* d_fileBuf;
 static unsigned char* d_inOutBuf;
+static unsigned long* length;
+static int multiplier = 200;
 extern "C" void copyKeyToDevice(AES_KEY* key)
 {
   // First attempt, load into device memory
@@ -302,38 +304,76 @@ extern "C" void copyKeyToDevice(AES_KEY* key)
   CUDA_SAFE_CALL(cudaMalloc((void**) &d_te3Buf, 1024));
   CUDA_SAFE_CALL(cudaMemcpy(d_te3Buf, Te3, 1024, cudaMemcpyHostToDevice));
   
-  CUDA_SAFE_CALL(cudaMalloc((void**) &d_inOutBuf, 16));
+
 }
 
-extern "C" void copyInToDevice(unsigned char* in)
+extern "C" void copyInToDevice(unsigned char* in, const unsigned long len)
 {
+  unsigned long copySize = len*multiplier;
 // copy host memory to device
-CUDA_SAFE_CALL(cudaMemcpy(d_inOutBuf, in, 16,
-                          cudaMemcpyHostToDevice) );
+  cudaError errCode = cudaMalloc((void**) &d_inOutBuf, copySize);
+  //if(errCode != cudaSuccess)
+  //{
+  //  printf("Malloc1 Error code %s\n", cudaGetErrorString(errCode));
+  //  return;
+ // }
+  errCode = cudaMemcpy(d_inOutBuf, in, copySize,
+                          cudaMemcpyHostToDevice);
+  //if(errCode != cudaSuccess)
+  //{
+  //  printf("MemCpy1 Error code %s\n", cudaGetErrorString(errCode));
+  //  return;
+  //}
+
+  errCode = cudaMalloc((void**) &length, sizeof(unsigned long));
+  //if(errCode != cudaSuccess)
+  //{
+  //  printf("Malloc2 Error code %s\n", cudaGetErrorString(errCode));
+  //  return;
+ // }
+
+  errCode = cudaMemcpy(length, &len, sizeof(unsigned long),
+			  cudaMemcpyHostToDevice);
+  //if(errCode != cudaSuccess)
+ // {
+  //  printf("MemCpy2 Error code %s\n", cudaGetErrorString(errCode));
+  //  return;
+  //}
 }
 
-extern "C" void copyOutToHost(unsigned char* out)
+extern "C" void copyOutToHost(unsigned char* out, const unsigned long len)
 {
-  CUDA_SAFE_CALL(cudaMemcpy(out, d_inOutBuf, 16, cudaMemcpyDeviceToHost) );
+  unsigned long copySize = len*multiplier;
+  CUDA_SAFE_CALL(cudaMemcpy(out, d_inOutBuf, copySize, cudaMemcpyDeviceToHost) );
+  //cudaError errCode = cudaFree(d_fileBuf);
+  //if(errCode != cudaSuccess)
+  //{
+  //  printf("Free1 Error code %s\n", cudaGetErrorString(errCode));
+  //  return;
+  //}
 
+  //cudaFree(d_inOutBuf);
+  //cudaFree(d_te0Buf);
+  //cudaFree(d_te1Buf);
+  //cudaFree(d_te2Buf);
+  //cudaFree(d_te3Buf);
+  //cudaFree(length);
 }
 
 
-__global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, unsigned char* in, u32* rk)
+__global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, unsigned char* in, u32* rdk, unsigned long* length)
 {
-	//const u32 *rk;
+	u32 *rk = rdk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
-	//const char* in = d_inOutBuf;
-	//const u32 *Te0 = d_te0Buf;
-	//const u32 *Te1 = d_te1Buf;
-	//const u32 *Te2 = d_te2Buf;
-	//const u32 *Te3 = d_te3Buf;
-	s0 = GETU32(in     ) ^ rk[0];
-	s1 = GETU32(in +  4) ^ rk[1];
-	s2 = GETU32(in +  8) ^ rk[2];
-	s3 = GETU32(in + 12) ^ rk[3];
-	//rk = d_fileBuf->rd_key;
 
+// iv starts at 0x0 for this implementation
+for(int i = 0; i < *length; i += 16)
+{
+	s0 = GETU32(in + threadIdx.x*(i) ) ^ rk[0];
+	s1 = GETU32(in + threadIdx.x*(i + 4) ) ^ rk[1];
+	s2 = GETU32(in + threadIdx.x*(i + 8) ) ^ rk[2];
+	s3 = GETU32(in + threadIdx.x*(i + 12) ) ^ rk[3];
+		
 	/* round 1: */
    	t0 = Te0[s0 >> 24] ^ Te1[(s1 >> 16) & 0xff] ^ Te2[(s2 >>  8) & 0xff] ^ Te3[s3 & 0xff] ^ rk[ 4];
    	t1 = Te0[s1 >> 24] ^ Te1[(s2 >> 16) & 0xff] ^ Te2[(s3 >>  8) & 0xff] ^ Te3[s0 & 0xff] ^ rk[ 5];
@@ -386,31 +426,39 @@ __global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, unsigned
 		(Te0[(t2 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t3      ) & 0xff] & 0x000000ff) ^
 		rk[0];
-	PUTU32(in     , s0);
+	PUTU32(in + threadIdx.x*(i), s0);
 	s1 =
 		(Te2[(t1 >> 24)       ] & 0xff000000) ^
 		(Te3[(t2 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t3 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t0      ) & 0xff] & 0x000000ff) ^
 		rk[1];
-	PUTU32(in +  4, s1);
+	PUTU32(in + threadIdx.x*(i + 4), s1);
 	s2 =
 		(Te2[(t2 >> 24)       ] & 0xff000000) ^
 		(Te3[(t3 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t0 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t1      ) & 0xff] & 0x000000ff) ^
 		rk[2];
-	PUTU32(in +  8, s2);
+	PUTU32(in + threadIdx.x*(i + 8), s2);
 	s3 =
 		(Te2[(t3 >> 24)       ] & 0xff000000) ^
 		(Te3[(t0 >> 16) & 0xff] & 0x00ff0000) ^
 		(Te0[(t1 >>  8) & 0xff] & 0x0000ff00) ^
 		(Te1[(t2      ) & 0xff] & 0x000000ff) ^
 		rk[3];
-	PUTU32(in + 12, s3);
+	PUTU32(in + threadIdx.x*(i + 12), s3);
+	if(i + 16 < *length)
+	{
+		for(int j = 0; j < 16; ++j)
+		{
+			in[threadIdx.x*(i+16+j)] = in[threadIdx.x*(i+j)] ^ in[threadIdx.x*(i+16+j)];
+		}
+	}
+}
 }
 
 extern "C" void cudaEncrypt()
 {
- cudaEncryptKern<<<1,1>>>(d_te0Buf, d_te1Buf, d_te2Buf, d_te3Buf, d_inOutBuf, d_fileBuf->rd_key);
+ cudaEncryptKern<<<1,multiplier>>>(d_te0Buf, d_te1Buf, d_te2Buf, d_te3Buf, d_inOutBuf, d_fileBuf->rd_key, length);
 }
