@@ -1,6 +1,6 @@
 /* crypto/aes/aes_core.c -*- mode:C; c-file-style: "eay" -*- */
 /**
- * rijndael-alg-fst.c
+ * rijndael-alg-fst.c 
  *
  * @version 3.0 (December 2000)
  *
@@ -27,7 +27,7 @@
 
 /* Note: rewritten a little bit to provide error control and an OpenSSL-
    compatible API */
-
+ 
 #ifndef AES_DEBUG 
 # ifndef NDEBUG
 #  define NDEBUG
@@ -51,7 +51,7 @@ Td2[x] = Si[x].[0d, 0b, 0e, 09];
 Td3[x] = Si[x].[09, 0d, 0b, 0e];
 Td4[x] = Si[x].[01];
 */
-
+ 
 static const u32 Te0[256] = {
     0xc66363a5U, 0xf87c7c84U, 0xee777799U, 0xf67b7b8dU,
     0xfff2f20dU, 0xd66b6bbdU, 0xde6f6fb1U, 0x91c5c554U,
@@ -118,7 +118,7 @@ static const u32 Te0[256] = {
     0x824141c3U, 0x299999b0U, 0x5a2d2d77U, 0x1e0f0f11U,
     0x7bb0b0cbU, 0xa85454fcU, 0x6dbbbbd6U, 0x2c16163aU,
 };
-static const u32 Te1[256] = {
+static const u32 Te1[256] = {  
     0xa5c66363U, 0x84f87c7cU, 0x99ee7777U, 0x8df67b7bU,
     0x0dfff2f2U, 0xbdd66b6bU, 0xb1de6f6fU, 0x5491c5c5U,
     0x50603030U, 0x03020101U, 0xa9ce6767U, 0x7d562b2bU,
@@ -448,8 +448,8 @@ static const u32 Td1[256] = {
     0x72161dc3U, 0x0cbce225U, 0x8b283c49U, 0x41ff0d95U,
     0x7139a801U, 0xde080cb3U, 0x9cd8b4e4U, 0x906456c1U,
     0x617bcb84U, 0x70d532b6U, 0x74486c5cU, 0x42d0b857U,
-};
-static const u32 Td2[256] = {
+};    
+static const u32 Td2[256] = {    
     0xa75051f4U, 0x65537e41U, 0xa4c31a17U, 0x5e963a27U,
     0x6bcb3babU, 0x45f11f9dU, 0x58abacfaU, 0x03934be3U,
     0xfa552030U, 0x6df6ad76U, 0x769188ccU, 0x4c25f502U,
@@ -615,10 +615,10 @@ static const u8 Td4[256] = {
     0x17U, 0x2bU, 0x04U, 0x7eU, 0xbaU, 0x77U, 0xd6U, 0x26U,
     0xe1U, 0x69U, 0x14U, 0x63U, 0x55U, 0x21U, 0x0cU, 0x7dU,
 };
-static const u32 rcon[] = { 
+static const u32 rcon[] = {  
 	0x01000000, 0x02000000, 0x04000000, 0x08000000,
 	0x10000000, 0x20000000, 0x40000000, 0x80000000,
-	0x1B000000, 0x36000000, /* for 128-bit blocks, Rijndael never uses more than 10 rcon values */            
+	0x1B000000, 0x36000000, /* for 128-bit blocks, Rijndael never uses more than 10 rcon values */               
 };
 
 /**
@@ -626,18 +626,18 @@ static const u32 rcon[] = {
  */
 int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 			AES_KEY *key) {
-    int p = 0;
+    int p = 0; 
 //    printf("Setting encrypt key\n");
 //    printf("bits: %i\n", bits);
-//    for(p = 0; p < 10; ++p)
+//    for(p = 0; p < 10; ++p) 
 //	{
 //	    printf("0x%02x ",userKey[p]);
 //	}
 //    printf("\n");
     int q = 0;
 	u32 *rk;
-   	int i = 0;
-	u32 temp;
+   	int i = 0; 
+	u32 temp; 
 
 	if (!userKey || !key)
 	    {
@@ -718,7 +718,7 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
 			rk[10] = rk[ 2] ^ rk[ 9];
 			rk[11] = rk[ 3] ^ rk[10];
 			if (++i == 7) {
-			       goto END;
+			       goto END; 
 			}
 			temp = rk[11];
 			rk[12] = rk[ 4] ^
@@ -737,8 +737,8 @@ int AES_set_encrypt_key(const unsigned char *userKey, const int bits,
  END:
 	copyKeyToDevice(key);
 	//printf("After copying key to device\n");
-	return 0;   
-}
+	return 0;    
+} 
 
 /**
  * Expand the cipher key into the decryption key schedule.
@@ -814,15 +814,15 @@ void AES_encrypt2(const unsigned char *in, unsigned char *out,
 //	    printf("%02x ",in[i]);
 //	}
 //    printf("\n");
-    copyInToDevice(in, length);   
+    // copyInToDevice(in, length);    
   // execute the kernel 
-cudaEncrypt();   ;
-copyOutToHost(out, length);
+    cudaEncrypt(in, out, length);
+//copyOutToHost(out, length);
 //printf("Got Back:\n");
 //for(i = 0; i < 16; ++i) 
 //    {
 //	printf("%02x ",out[i]);
-//    }
+//    } 
 //printf("\n");
 
 /* End CUDA Implementation, comment out rest of function */ 

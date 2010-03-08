@@ -276,10 +276,9 @@ u32* d_te0Buf;
 u32* d_te1Buf;
 u32* d_te2Buf;
 u32* d_te3Buf;
-static AES_KEY* d_fileBuf;
-static unsigned char* d_inOutBuf;
-static unsigned long* length;
-static int multiplier = 200;
+AES_KEY* d_fileBuf;
+unsigned long* length;
+int multiplier = 512; 
 extern "C" void copyKeyToDevice(AES_KEY* key)
 {
   // First attempt, load into device memory
@@ -303,69 +302,118 @@ extern "C" void copyKeyToDevice(AES_KEY* key)
   
   CUDA_SAFE_CALL(cudaMalloc((void**) &d_te3Buf, 1024));
   CUDA_SAFE_CALL(cudaMemcpy(d_te3Buf, Te3, 1024, cudaMemcpyHostToDevice));
-  
 
 }
-
+/*
 extern "C" void copyInToDevice(unsigned char* in, const unsigned long len)
 {
   unsigned long copySize = len*multiplier;
 // copy host memory to device
   cudaError errCode = cudaMalloc((void**) &d_inOutBuf, copySize);
-  //if(errCode != cudaSuccess)
-  //{
-  //  printf("Malloc1 Error code %s\n", cudaGetErrorString(errCode));
-  //  return;
- // }
+  if(errCode != cudaSuccess)
+  {
+    printf("Malloc1 Error code %s\n", cudaGetErrorString(errCode));
+	fflush(stdout);
+    return;
+  }
   errCode = cudaMemcpy(d_inOutBuf, in, copySize,
                           cudaMemcpyHostToDevice);
-  //if(errCode != cudaSuccess)
-  //{
-  //  printf("MemCpy1 Error code %s\n", cudaGetErrorString(errCode));
-  //  return;
-  //}
+  if(errCode != cudaSuccess)
+  {
+    printf("MemCpy1 Error code %s\n", cudaGetErrorString(errCode));
+    return;
+  }
 
   errCode = cudaMalloc((void**) &length, sizeof(unsigned long));
-  //if(errCode != cudaSuccess)
-  //{
-  //  printf("Malloc2 Error code %s\n", cudaGetErrorString(errCode));
-  //  return;
- // }
+  if(errCode != cudaSuccess)
+  {
+    printf("Malloc2 Error code %s\n", cudaGetErrorString(errCode));
+    return;
+  }
 
   errCode = cudaMemcpy(length, &len, sizeof(unsigned long),
 			  cudaMemcpyHostToDevice);
-  //if(errCode != cudaSuccess)
- // {
-  //  printf("MemCpy2 Error code %s\n", cudaGetErrorString(errCode));
-  //  return;
-  //}
+  if(errCode != cudaSuccess)
+  {
+    printf("MemCpy2 Error code %s\n", cudaGetErrorString(errCode));
+    return;
+  }
 }
 
 extern "C" void copyOutToHost(unsigned char* out, const unsigned long len)
 {
   unsigned long copySize = len*multiplier;
   CUDA_SAFE_CALL(cudaMemcpy(out, d_inOutBuf, copySize, cudaMemcpyDeviceToHost) );
-  //cudaError errCode = cudaFree(d_fileBuf);
-  //if(errCode != cudaSuccess)
-  //{
-  //  printf("Free1 Error code %s\n", cudaGetErrorString(errCode));
-  //  return;
-  //}
+  
+  cudaError errCode = cudaFree(d_fileBuf);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free1 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
+  errCode = cudaFree(length);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free7 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
+  errCode = cudaFree(d_te0Buf);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free3 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
+  errCode = cudaFree(d_te1Buf);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free4 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
+  errCode = cudaFree(d_te2Buf);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free5 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
+  errCode = cudaFree(d_te3Buf);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free6 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
+  errCode = cudaFree(d_inOutBuf);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free2 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
 
-  //cudaFree(d_inOutBuf);
-  //cudaFree(d_te0Buf);
-  //cudaFree(d_te1Buf);
-  //cudaFree(d_te2Buf);
-  //cudaFree(d_te3Buf);
-  //cudaFree(length);
-}
+}*/
 
 
-__global__ void cudaEncryptKern(u32* Te0, u32* Te1, u32* Te2, u32* Te3, unsigned char* in, u32* rdk, unsigned long* length)
+__global__ void cudaEncryptKern(u32* _Te0, u32* _Te1, u32* _Te2, u32* _Te3, unsigned char* in, u32* rdk, unsigned long* length)
 {
 	u32 *rk = rdk;
 	u32 s0, s1, s2, s3, t0, t1, t2, t3;
-
+	__shared__ u32 Te0[256];
+	__shared__ u32 Te1[256];
+	__shared__ u32 Te2[256];
+	__shared__ u32 Te3[256];
+if(threadIdx.x < 256)
+{	
+	Te0[threadIdx.x] = _Te0[threadIdx.x];
+	Te1[threadIdx.x] = _Te1[threadIdx.x];
+	Te2[threadIdx.x] = _Te2[threadIdx.x];
+	Te3[threadIdx.x] = _Te3[threadIdx.x];
+}
+__syncthreads();
 // iv starts at 0x0 for this implementation
 for(int i = 0; i < *length; i += 16)
 {
@@ -456,9 +504,67 @@ for(int i = 0; i < *length; i += 16)
 		}
 	}
 }
+__syncthreads();
 }
 
-extern "C" void cudaEncrypt()
+extern "C" void cudaEncrypt(unsigned char* in, unsigned char* out, const unsigned long len)
 {
+
+unsigned char* d_inOutBuf;
+printf("Enter:\n");
+  unsigned long copySize = len*multiplier;
+// copy host memory to device
+  cudaError errCode = cudaMalloc((void**) &d_inOutBuf, copySize);
+  if(errCode != cudaSuccess)
+  {
+    printf("Malloc1 Error code %s\n", cudaGetErrorString(errCode));
+	fflush(stdout);
+    return;
+  }
+  errCode = cudaMemcpy(d_inOutBuf, in, copySize,
+                          cudaMemcpyHostToDevice);
+  if(errCode != cudaSuccess)
+  {
+    printf("MemCpy1 Error code %s\n", cudaGetErrorString(errCode));
+    return;
+  }
+
+  errCode = cudaMalloc((void**) &length, sizeof(unsigned long));
+  if(errCode != cudaSuccess)
+  {
+    printf("Malloc2 Error code %s\n", cudaGetErrorString(errCode));
+    return;
+  }
+
+  errCode = cudaMemcpy(length, &len, sizeof(unsigned long),
+			  cudaMemcpyHostToDevice);
+  if(errCode != cudaSuccess)
+  {
+    printf("MemCpy2 Error code %s\n", cudaGetErrorString(errCode));
+    return;
+  }
+
+  unsigned char * svinOutBuf = d_inOutBuf;
+
  cudaEncryptKern<<<1,multiplier>>>(d_te0Buf, d_te1Buf, d_te2Buf, d_te3Buf, d_inOutBuf, d_fileBuf->rd_key, length);
+
+  CUDA_SAFE_CALL(cudaMemcpy(out, d_inOutBuf, copySize, cudaMemcpyDeviceToHost) );
+  
+
+  errCode = cudaFree(length);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free1 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
+
+  errCode = cudaFree(svinOutBuf);
+  if(errCode != cudaSuccess)
+  {
+    printf("Free2 Error code %s\n", cudaGetErrorString(errCode));
+    fflush(stdout);
+	return;
+  }
+printf("Exit:\n");
 }

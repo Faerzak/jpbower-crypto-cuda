@@ -1804,7 +1804,7 @@ int MAIN(int argc, char **argv)
 					(unsigned long)lengths[j],&aes_ks1,
 					iv,AES_ENCRYPT);
 			d=Time_F(STOP);
-			print_result(D_CBC_128_AES,j,count*200,d);
+			print_result(D_CBC_128_AES,j,count*512,d);
 			}
 		}
 	if (doit[D_CBC_192_AES])
