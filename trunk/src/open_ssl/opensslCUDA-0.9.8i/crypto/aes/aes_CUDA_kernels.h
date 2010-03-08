@@ -5,5 +5,6 @@
 void copyKeyToDevice(AES_KEY* key);
 void copyInToDevice(char* in, const unsigned long len);
 void copyOutToHost(char* out, const unsigned long len);
-void cudaEncrypt();
+void cudaEncrypt(unsigned char* in, unsigned char* out, const unsigned long len);
+
 #endif
